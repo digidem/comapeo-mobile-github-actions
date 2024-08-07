@@ -23,5 +23,8 @@ jobs:
         with:
           expo-token: ${{ secrets.EXPO }}
 
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
       - name: Build Test APK
         run: eas build --platform android --profile test --branch release/v1.1.0
