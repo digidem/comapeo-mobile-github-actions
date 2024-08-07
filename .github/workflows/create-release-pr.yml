@@ -40,3 +40,30 @@ jobs:
           echo "Creating and pushing new branch release/v$new_version"
           git checkout -b release/v$new_version || { echo "ERROR: Branch creation failed"; exit 1; }
           git push origin release/v$new_version --force || { echo "ERROR: Push failed"; exit 1; }
+
+      - name: Check if deploy branch exists
+        id: check_deploy_branch
+        run: |
+          if git ls-remote --exit-code --heads origin deploy; then
+            echo "Deploy branch exists."
+            echo "DEPLOY_BRANCH_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "Deploy branch does not exist."
+            echo "DEPLOY_BRANCH_EXISTS=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create Pull Request to deploy
+        if: env.DEPLOY_BRANCH_EXISTS == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          new_version=${{ env.VERSION }}
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -d "{\"title\":\"Release v$new_version\",\"body\":\"This PR is for the release of version $new_version\",\"head\":\"release/v$new_version\",\"base\":\"deploy\"}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls
+
+      - name: Notify if deploy branch is missing
+        if: env.DEPLOY_BRANCH_EXISTS == 'false'
+        run: echo "The deploy branch does not exist. Please create it manually."
