@@ -67,3 +67,13 @@ jobs:
       - name: Notify if deploy branch is missing
         if: env.DEPLOY_BRANCH_EXISTS == 'false'
         run: echo "The deploy branch does not exist. Please create it manually."
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          expo-token: ${{ secrets.EXPO }}
+
+      - name: Build Test APK
+        run: eas build -p android -e test
+
+        
