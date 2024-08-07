@@ -40,29 +40,3 @@ jobs:
           echo "Creating and pushing new branch release/v$new_version"
           git checkout -b release/v$new_version || { echo "ERROR: Branch creation failed"; exit 1; }
           git push origin release/v$new_version --force || { echo "ERROR: Push failed"; exit 1; }
-
-      - name: Check if deploy branch exists
-        id: check_deploy_branch
-        run: |
-          if git ls-remote --exit-code --heads origin deploy; then
-            echo "Deploy branch exists."
-            echo "DEPLOY_BRANCH_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "Deploy branch does not exist."
-            echo "DEPLOY_BRANCH_EXISTS=false" >> $GITHUB_ENV
-          fi
-
-      - name: Create Pull Request to deploy
-        if: env.DEPLOY_BRANCH_EXISTS == 'true'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: 'Create release branch release/v${{ env.VERSION }}'
-          branch: release/v${{ env.VERSION }}
-          base: deploy
-          title: 'Release v${{ env.VERSION }}'
-          body: 'This PR is for the release of version ${{ env.VERSION }}'
-
-
-      - name: Notify if deploy branch is missing
-        if: env.DEPLOY_BRANCH_EXISTS == 'false'
-        run: echo "The deploy branch does not exist. Please create it manually."
