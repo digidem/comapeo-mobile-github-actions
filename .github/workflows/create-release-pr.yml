@@ -74,6 +74,6 @@ jobs:
           expo-token: ${{ secrets.EXPO }}
 
       - name: Build Test APK
-        run: eas build -p android -e test
+        run: eas build --platform android --profile test --branch release/v${{ env.VERSION }}
 
         
