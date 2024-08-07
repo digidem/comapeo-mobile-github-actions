@@ -1,6 +1,6 @@
 # CoMapeo Mobile
 
-The next version of Mapeo Mobile
+New update to test differences
 
 ## Getting started
 
