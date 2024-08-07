@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: develop
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -37,18 +39,20 @@ jobs:
           new_version="${major}.${new_minor}.0"
           echo "New version: $new_version"
 
-          # Check if VERSION environment variable is set
+          # Set the new version in an environment file
           echo "VERSION=$new_version" >> $GITHUB_ENV
-          if [ -z "$new_version" ]; then
-            echo "ERROR: Version could not be determined."
-            exit 1
-          fi
 
       - name: Configure git
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git status || exit 1
+          git status
+
+      - name: Fetch latest changes
+        run: |
+          git fetch origin
+          git checkout develop
+          git pull origin develop
 
       - name: Create new branch
         id: create_branch
