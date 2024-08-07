@@ -26,5 +26,10 @@ jobs:
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
+      - name: Checkout Release Branch
+        run: |
+          git checkout release/v1.1.0
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+
       - name: Build Test APK
-        run: eas build --platform android --profile test --branch release/v1.1.0
+        run: eas build --platform android --profile test
