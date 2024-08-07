@@ -52,18 +52,16 @@ jobs:
             echo "DEPLOY_BRANCH_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      - name: Debug Info
-        run: |
-          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
-          echo "Remote branches:"
-          git branch -r
-
-      - name: open-pull-request
-        uses: rematocorp/open-pull-request-action@v1
+      - name: Create Pull Request to deploy
+        if: env.DEPLOY_BRANCH_EXISTS == 'true'
+        uses: peter-evans/create-pull-request@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          from-branch: release/v${{ env.VERSION }}
-          to-branch: deploy
+          commit-message: 'Create release branch release/v${{ env.VERSION }}'
+          branch: release/v${{ env.VERSION }}
+          base: deploy
+          title: 'Release v${{ env.VERSION }}'
+          body: 'This PR is for the release of version ${{ env.VERSION }}'
+
 
       - name: Notify if deploy branch is missing
         if: env.DEPLOY_BRANCH_EXISTS == 'false'
