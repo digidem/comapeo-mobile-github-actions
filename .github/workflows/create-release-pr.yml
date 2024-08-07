@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          ref: develop  # Ensure the workflow runs from the develop branch
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
