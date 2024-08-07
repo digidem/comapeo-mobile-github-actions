@@ -18,13 +18,11 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          expo-token: ${{ secrets.EXPO }}
-
       - name: Install EAS CLI
         run: npm install -g eas-cli
+
+      - name: Login to Expo
+        run: echo ${{ secrets.EXPO }} | eas login --token
 
       - name: Checkout Release Branch
         uses: actions/checkout@v3
