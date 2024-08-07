@@ -37,8 +37,9 @@ jobs:
       - name: Create and push new branch
         run: |
           new_version=${{ env.VERSION }}
+          echo "Creating and pushing new branch release/v$new_version"
           git checkout -b release/v$new_version || { echo "ERROR: Branch creation failed"; exit 1; }
-          git push origin release/v$new_version || { echo "ERROR: Push failed"; exit 1; }
+          git push origin release/v$new_version --force || { echo "ERROR: Push failed"; exit 1; }
 
       - name: Check if deploy branch exists
         id: check_deploy_branch
