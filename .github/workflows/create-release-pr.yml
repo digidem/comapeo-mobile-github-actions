@@ -52,7 +52,13 @@ jobs:
             echo "DEPLOY_BRANCH_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      - name: Create Pull Request
+      - name: Debug Info
+        run: |
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Remote branches:"
+          git branch -r
+
+      - name: Create Pull Request to deploy
         if: env.DEPLOY_BRANCH_EXISTS == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
