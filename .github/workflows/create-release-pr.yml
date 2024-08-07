@@ -62,7 +62,7 @@ jobs:
         if: env.DEPLOY_BRANCH_EXISTS == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
-          token: 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
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'Create release branch release/v${{ env.VERSION }}'
           branch: release/v${{ env.VERSION }}
           base: deploy
