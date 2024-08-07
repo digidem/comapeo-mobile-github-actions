@@ -58,16 +58,12 @@ jobs:
           echo "Remote branches:"
           git branch -r
 
-      - name: Create Pull Request to deploy
-        if: env.DEPLOY_BRANCH_EXISTS == 'true'
-        uses: peter-evans/create-pull-request@v6
+      - name: open-pull-request
+        uses: rematocorp/open-pull-request-action@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'Create release branch release/v${{ env.VERSION }}'
-          branch: release/v${{ env.VERSION }}
-          base: deploy
-          title: 'Release v${{ env.VERSION }}'
-          body: 'This PR is for the release of version ${{ env.VERSION }}'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          from-branch: release/v${{ env.VERSION }}
+          to-branch: deploy
 
       - name: Notify if deploy branch is missing
         if: env.DEPLOY_BRANCH_EXISTS == 'false'
