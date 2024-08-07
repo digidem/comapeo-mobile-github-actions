@@ -21,41 +21,38 @@ jobs:
       - name: Read package.json version
         id: read_version
         run: |
-          # Print the current directory and list files for debugging
-          pwd
-          ls -la
-
-          # Read and print the current version from package.json
           version=$(node -p "require('./package.json').version")
-          echo "Current version: $version"
-
-          # Extract version components and increment minor version
           major=$(echo $version | cut -d. -f1)
           minor=$(echo $version | cut -d. -f2)
           patch=$(echo $version | cut -d. -f3 | cut -d- -f1)
-          echo "Extracted version - Major: $major, Minor: $minor, Patch: $patch"
-
           new_minor=$((minor + 1))
           new_version="${major}.${new_minor}.0"
-          echo "New version: $new_version"
-
-          # Set the new version in an environment file
           echo "VERSION=$new_version" >> $GITHUB_ENV
 
       - name: Configure git
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git status
 
       - name: Create and push new branch
         run: |
           new_version=${{ env.VERSION }}
-          echo "Creating and pushing new branch release/v$new_version"
           git checkout -b release/v$new_version || { echo "ERROR: Branch creation failed"; exit 1; }
-          git push origin release/v$new_version --force || { echo "ERROR: Push failed"; exit 1; }
+          git push origin release/v$new_version || { echo "ERROR: Push failed"; exit 1; }
+
+      - name: Check if deploy branch exists
+        id: check_deploy_branch
+        run: |
+          if git ls-remote --exit-code --heads origin deploy; then
+            echo "Deploy branch exists."
+            echo "DEPLOY_BRANCH_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "Deploy branch does not exist."
+            echo "DEPLOY_BRANCH_EXISTS=false" >> $GITHUB_ENV
+          fi
 
       - name: Create Pull Request
+        if: env.DEPLOY_BRANCH_EXISTS == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -64,3 +61,7 @@ jobs:
           base: deploy
           title: 'Release v${{ env.VERSION }}'
           body: 'This PR is for the release of version ${{ env.VERSION }}'
+
+      - name: Notify if deploy branch is missing
+        if: env.DEPLOY_BRANCH_EXISTS == 'false'
+        run: echo "The deploy branch does not exist. Please create it manually."
