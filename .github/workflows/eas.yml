@@ -21,13 +21,19 @@ jobs:
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
-      - name: Login to Expo
-        run: echo ${{ secrets.EXPO }} | eas login --token
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO }}
 
       - name: Checkout Release Branch
         uses: actions/checkout@v3
         with:
           ref: release/v1.1.0
+
+      - name: 📦 Install dependencies
+        run: npm install
 
       - name: Build Test APK
         run: eas build --platform android --profile test
