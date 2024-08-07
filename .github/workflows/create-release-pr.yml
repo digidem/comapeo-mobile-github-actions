@@ -14,9 +14,9 @@ jobs:
           ref: develop  # Ensure the workflow runs from the develop branch
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version-file: '.nvmrc'
 
       - name: Read package.json version
         id: read_version
@@ -30,11 +30,20 @@ jobs:
           echo "New version: $new_version"
           echo "::set-output name=version::$new_version"
 
+      - name: Configure git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
       - name: Create new branch
         id: create_branch
         run: |
           new_version=${{ steps.read_version.outputs.version }}
           git checkout -b release/v$new_version
+
+      - name: Push new branch
+        run: |
+          new_version=${{ steps.read_version.outputs.version }}
           git push origin release/v$new_version
 
       - name: Create Pull Request
