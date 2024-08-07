@@ -1,0 +1,27 @@
+name: run expo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-release-branch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          expo-token: ${{ secrets.EXPO }}
+
+      - name: Build Test APK
+        run: eas build --platform android --profile test --branch release/v1.1.0
