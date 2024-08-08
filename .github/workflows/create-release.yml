@@ -92,6 +92,4 @@ jobs:
         run: npm install
 
       - name: Build Test APK
-        run: eas build --platform android --profile test
-
-        
+        run: eas build --platform android --profile release-candidate

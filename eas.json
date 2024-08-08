@@ -18,11 +18,11 @@
         "APP_VARIANT": "development"
       }
     },
-    "test": {
+    "release-candidate": {
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "APP_VARIANT": "test"
+        "APP_VARIANT": "releaseCandidate"
       },
       "android": {
         "image": "latest",
@@ -42,6 +42,20 @@
       "channel": "production",
       "env": {
         "APP_VARIANT": "production"
+      }
+    },
+    "pre-release": {
+      "distribution": "internal",
+      "channel": "preview",
+      "env": {
+        "APP_VARIANT": "preRelease"
+      },
+      "android": {
+        "image": "latest",
+        "buildType": "apk"
+      },
+      "ios": {
+        "image": "latest"
       }
     }
   },
