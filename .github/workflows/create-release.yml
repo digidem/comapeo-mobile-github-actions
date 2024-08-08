@@ -1,4 +1,4 @@
-name: Create Release Branch and Dispatch EAS Build
+name: Create Release Branch and Dispatches EAS Build
 
 on:
   workflow_dispatch:
@@ -91,5 +91,5 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
-      - name: Build Test APK
+      - name: Build Release Candidate APK
         run: eas build --platform android --profile release-candidate
