@@ -7,6 +7,9 @@ jobs:
   create-release-branch:
     runs-on: ubuntu-latest
 
+    outputs:
+      version: ${{ steps.read_version.outputs.VERSION }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
