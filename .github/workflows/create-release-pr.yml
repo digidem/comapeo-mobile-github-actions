@@ -81,7 +81,7 @@ jobs:
       - name: Checkout Release Branch
         uses: actions/checkout@v3
         with:
-          ref: release/v${{ env.VERSION }}
+          ref: release/v${{ needs.create-release-branch.outputs.version }}
 
       - name: 📦 Install dependencies
         run: npm install
