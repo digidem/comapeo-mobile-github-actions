@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 7.8.0"
+    "version": ">= 7.8.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -42,7 +43,8 @@
       "channel": "production",
       "env": {
         "APP_VARIANT": "production"
-      }
+      },
+      "autoIncrement": true
     },
     "pre-release": {
       "distribution": "internal",

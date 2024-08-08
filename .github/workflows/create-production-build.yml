@@ -1,0 +1,48 @@
+name: Build on Release Branch Merged into Deploy
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check if merge commit from release branch
+        id: check_merge
+        run: |
+          if [[ -f $GITHUB_EVENT_PATH ]]; then
+            EVENT_DATA=$(cat $GITHUB_EVENT_PATH)
+            MESSAGE=$(echo $EVENT_DATA | jq -r '.head_commit.message')
+            echo "Commit message: $MESSAGE"
+            if [[ $MESSAGE == *"Merge branch 'release/v"* ]] && [[ $MESSAGE == *"into deploy"* ]]; then
+              echo "MATCH=true" >> $GITHUB_ENV
+            else
+              echo "MATCH=false" >> $GITHUB_ENV
+            fi
+          else
+            echo "No event data found" >> $GITHUB_ENV
+            echo "MATCH=false" >> $GITHUB_ENV
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO }}
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: Build Release Candidate APK
+        run: eas build --platform android --profile production
