@@ -1,4 +1,4 @@
-name: Create Release Branch and PR
+name: Create Release Branch and Dispatch EAS Build
 
 on:
   workflow_dispatch:
@@ -68,12 +68,25 @@ jobs:
         if: env.DEPLOY_BRANCH_EXISTS == 'false'
         run: echo "The deploy branch does not exist. Please create it manually."
 
-      - name: Setup EAS
+  dispatch-eas-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🏗 Setup EAS
         uses: expo/expo-github-action@v8
         with:
-          expo-token: ${{ secrets.EXPO }}
+          eas-version: latest
+          token: ${{ secrets.EXPO }}
+
+      - name: Checkout Release Branch
+        uses: actions/checkout@v3
+        with:
+          ref: release/v${{ env.VERSION }}
+
+      - name: 📦 Install dependencies
+        run: npm install
 
       - name: Build Test APK
-        run: eas build --platform android --profile test --branch release/v${{ env.VERSION }}
+        run: eas build --platform android --profile test
 
         
