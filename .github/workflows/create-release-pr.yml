@@ -32,6 +32,9 @@ jobs:
           new_version="${major}.${new_minor}.0"
           echo "VERSION=$new_version" >> $GITHUB_ENV
 
+      - name: Print version for debugging
+        run: echo "Set version:${{ steps.read_version.outputs.VERSION }}"
+
       - name: Configure git
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -80,6 +83,9 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO }}
+
+      - name: Print version for debugging
+        run: echo "Version from previous job:${{ needs.create-release-branch.outputs.version }}"
 
       - name: Checkout Release Branch
         uses: actions/checkout@v3
