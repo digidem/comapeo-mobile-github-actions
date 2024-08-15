@@ -41,7 +41,7 @@ jobs:
       - name: Create and push new branch
         run: |
           new_version=${{ env.VERSION }}
-          package_version = ${{ env.VERSION }}-rc.0
+          package_version=${{ env.VERSION }}-rc.0
           echo "Creating and pushing new branch release/v$new_version"
           git checkout -b release/v$new_version || { echo "ERROR: Branch creation failed"; exit 1; }
 
