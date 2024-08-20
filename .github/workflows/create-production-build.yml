@@ -1,34 +1,23 @@
 name: Build on Release Branch Merged into Deploy
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
-      - deploy
+      - release/v*
 
 jobs:
-  build:
+  build_on_merge:
+    # this job will only run if the PR has been merged
+    if: github.event.pull_request.merged == true
+
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Check if merge commit from release branch
-        id: check_merge
-        run: |
-          if [[ -f $GITHUB_EVENT_PATH ]]; then
-            EVENT_DATA=$(cat $GITHUB_EVENT_PATH)
-            MESSAGE=$(echo $EVENT_DATA | jq -r '.head_commit.message')
-            echo "Commit message: $MESSAGE"
-            if [[ $MESSAGE == *"Merge branch 'release/v"* ]] && [[ $MESSAGE == *"into deploy"* ]]; then
-              echo "MATCH=true" >> $GITHUB_ENV
-            else
-              echo "MATCH=false" >> $GITHUB_ENV
-            fi
-          else
-            echo "No event data found" >> $GITHUB_ENV
-            echo "MATCH=false" >> $GITHUB_ENV
-          fi
+        with:
+          ref: deploy
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
