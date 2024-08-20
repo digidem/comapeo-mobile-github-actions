@@ -1,10 +1,9 @@
 name: Build on Release Branch Merged into Deploy
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches:
-      - release/v*
+      - deploy
 
 jobs:
   build_on_merge:
