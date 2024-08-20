@@ -33,5 +33,5 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
-      - name: Build Release Candidate APK
+      - name: Build Production AAB
         run: eas build --platform android --profile production
