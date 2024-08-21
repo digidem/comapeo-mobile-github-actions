@@ -18,6 +18,9 @@ jobs:
       - name: Fetch all tags
         run: git fetch --tags
 
+      - name: Fetch all branches
+        run: git fetch origin
+
       - name: Check if the commit is a merge from deploy
         id: check_merge
         run: |
