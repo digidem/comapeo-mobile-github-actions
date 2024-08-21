@@ -14,9 +14,6 @@ const NAME =
     preRelease: '(PRE)',
   }[process.env.APP_VARIANT] ?? '';
 
-const VERSION = process.env.VERSION ?? 'unknown';
-const LATEST_SHA = process.env.LATEST_SHA;
-
 /**
  * @param {object} opts
  * @param {import('@expo/config-types').ExpoConfig} opts.config
@@ -25,7 +22,6 @@ const LATEST_SHA = process.env.LATEST_SHA;
  */
 module.exports = ({config}) => ({
   ...config,
-  version: LATEST_SHA ? `${VERSION}+${LATEST_SHA}` : VERSION,
   extra: {
     ...config.extra,
     eas: {
