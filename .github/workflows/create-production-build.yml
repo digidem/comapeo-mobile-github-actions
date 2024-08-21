@@ -35,6 +35,16 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
+      - name: Read package.json version
+        id: read_version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          major=$(echo $version | cut -d. -f1)
+          minor=$(echo $version | cut -d. -f2)
+          patch=$(echo $version | cut -d. -f3 | cut -d- -f1)
+          new_version="${major}.${minor}.0"
+          echo "VERSION=$version" >> $GITHUB_ENV
+
       - name: Setup EAS CLI
         uses: expo/expo-github-action@v8
         with:
@@ -44,5 +54,7 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
-      - name: Build Release Candidate APK
+      - name: Build Production AAB
         run: eas build --platform android --profile production
+        env:
+          VERSION: ${{ env.VERSION }}
