@@ -18,14 +18,11 @@ jobs:
       - name: Fetch all tags
         run: git fetch --tags
 
-      - name: Fetch all branches
-        run: git fetch origin
-
       - name: Check if the commit is a merge from deploy
         id: check_merge
         run: |
           COMMIT_SHA=$(git rev-parse HEAD)
-          MERGE_BASE=$(git merge-base HEAD deploy)
+          MERGE_BASE=$(git merge-base HEAD origin/deploy)
           if [ "$COMMIT_SHA" == "$MERGE_BASE" ]; then
             echo "MERGED_FROM_DEPLOY=true" >> $GITHUB_ENV
           else
