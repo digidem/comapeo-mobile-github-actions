@@ -1,0 +1,72 @@
+name: Tag and Bump Version on Deploy Merge
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  tag_and_bump:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the develop branch
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      - name: Check if the commit is a merge from deploy
+        id: check_merge
+        run: |
+          COMMIT_SHA=$(git rev-parse HEAD)
+          MERGE_BASE=$(git merge-base HEAD deploy)
+          if [ "$COMMIT_SHA" == "$MERGE_BASE" ]; then
+            echo "MERGED_FROM_DEPLOY=true" >> $GITHUB_ENV
+          else
+            echo "MERGED_FROM_DEPLOY=false" >> $GITHUB_ENV
+          fi
+
+      - name: Get version from deploy branch
+        if: env.MERGED_FROM_DEPLOY == 'true'
+        id: get_version
+        run: |
+          git checkout deploy
+          VERSION=$(jq -r .version < package.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Checkout the develop branch again
+        if: env.MERGED_FROM_DEPLOY == 'true'
+        run: git checkout develop
+
+      - name: Create tag from deploy version
+        if: env.MERGED_FROM_DEPLOY == 'true'
+        run: |
+          git tag -a "v$VERSION" -m "Release version $VERSION from deploy"
+          git push origin "v$VERSION"
+
+      - name: Bump version in package.json
+        if: env.MERGED_FROM_DEPLOY == 'true'
+        run: |
+          VERSION=$(jq -r .version < package.json)
+          major=$(echo $VERSION | cut -d. -f1)
+          minor=$(echo $VERSION | cut -d. -f2)
+          next_minor=$((minor + 1))
+          new_version="${major}.${next_minor}.0-pre"
+          jq ".version = \"$new_version\"" package.json > tmp.json && mv tmp.json package.json
+          echo "Bumped version to $new_version"
+
+      - name: Commit and push version bump
+        if: env.MERGED_FROM_DEPLOY == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: bump version to $(jq -r .version < package.json)"
+          git push origin develop
+
+      - name: Notify if not a merge from deploy
+        if: env.MERGED_FROM_DEPLOY == 'false'
+        run: echo "This is not a merge from deploy. Skipping tag and version bump."
