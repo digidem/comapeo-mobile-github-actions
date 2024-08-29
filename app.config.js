@@ -8,11 +8,14 @@ const SUFFIX =
 
 const NAME =
   {
-    development: ' (DEV)',
+    development: ' Dev',
     production: '',
-    releaseCandidate: ' (RC)',
-    preRelease: '(PRE)',
+    releaseCandidate: ' Rc',
+    preRelease: ' Pre',
   }[process.env.APP_VARIANT] ?? '';
+
+const VERSION = process.env.VERSION ?? 'unknown';
+const LATEST_SHA = process.env.COMMIT_SHA;
 
 /**
  * @param {object} opts
@@ -22,6 +25,7 @@ const NAME =
  */
 module.exports = ({config}) => ({
   ...config,
+  version: LATEST_SHA ? `${VERSION}+${LATEST_SHA}` : VERSION,
   extra: {
     ...config.extra,
     eas: {
