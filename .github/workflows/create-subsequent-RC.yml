@@ -1,0 +1,62 @@
+name: Build Subsequenbt Release Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      rc_number:
+        description: 'Release Candidate Number'
+        required: true
+        default: '1'
+
+jobs:
+  build-release-candidate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Read package.json version and set new version
+        id: read_version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          major=$(echo $version | cut -d. -f1)
+          minor=$(echo $version | cut -d. -f2)
+          patch=$(echo $version | cut -d. -f3 | cut -d- -f1)
+          rc_number="${{ github.event.inputs.rc_number }}"
+          new_version="${major}.${minor}.${patch}-RC.${rc_number}"
+          branch_name="release/v${major}.${minor}.${patch}"
+          echo "VERSION=$new_version" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
+          echo "::set-output name=VERSION::$new_version"
+          echo "::set-output name=BRANCH_NAME::$branch_name"
+
+      - name: Checkout Release Branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.read_version.outputs.BRANCH_NAME }}
+
+      - name: Get latest commit SHA
+        id: get_commit_sha
+        run: |
+          commit_sha=$(git rev-parse HEAD)
+          echo "Commit SHA: $commit_sha"
+          echo "COMMIT_SHA=$commit_sha" >> $GITHUB_ENV
+          echo "::set-output name=COMMIT_SHA::$commit_sha"
+
+      - name: 🏗 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Release Candidate APK
+        env:
+          COMMIT_SHA: ${{ steps.get_commit_sha.outputs.COMMIT_SHA }}
+          VERSION: ${{ steps.read_version.outputs.VERSION }}
+        run: eas build --platform android --profile release-candidate
