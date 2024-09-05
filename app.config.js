@@ -14,7 +14,7 @@ const NAME =
     preRelease: ' Pre',
   }[process.env.APP_VARIANT] ?? '';
 
-const VERSION = process.env.VERSION ?? 'unknown';
+const VERSION = process.env.EXPO_PUBLIC_VERSION ?? 'unknown';
 const LATEST_SHA = process.env.COMMIT_SHA;
 
 /**
