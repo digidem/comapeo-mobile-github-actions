@@ -1,3 +1,5 @@
+const execa = require('execa');
+
 const SUFFIX =
   {
     development: '.dev',
@@ -14,8 +16,25 @@ const NAME =
     preRelease: ' Pre',
   }[process.env.APP_VARIANT] ?? '';
 
-const VERSION = process.env.EXPO_PUBLIC_VERSION ?? 'unknown';
-const LATEST_SHA = process.env.COMMIT_SHA;
+const pkgVersion = require('./package.json').version;
+const pkgVersionBase = pkgVersion.replace(/-.*/, '');
+
+const commitCountSinceDevelop = execa.sync('git', [
+  'rev-list',
+  '--count',
+  'develop',
+]).stdout;
+
+const commitSha = execa.sync('git', ['rev-parse', 'HEAD']).stdout;
+
+const VERSION = SUFFIX
+  ? `${pkgVersionBase}-${SUFFIX}.${commitCountSinceDevelop}`
+  : pkgVersionBase;
+
+const LATEST_SHA = (commitSha || process.env.EAS_BUILD_GIT_COMMIT_HASH).slice(
+  0,
+  7,
+);
 
 /**
  * @param {object} opts
@@ -25,7 +44,10 @@ const LATEST_SHA = process.env.COMMIT_SHA;
  */
 module.exports = ({config}) => ({
   ...config,
-  version: LATEST_SHA ? `${VERSION}+${LATEST_SHA}` : VERSION,
+  version:
+    process.env.APP_VARIANT === 'production' || !LATEST_SHA
+      ? VERSION
+      : `${VERSION}+${LATEST_SHA}`,
   extra: {
     ...config.extra,
     eas: {

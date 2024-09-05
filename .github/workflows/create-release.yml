@@ -8,9 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      version: ${{ steps.read_version.outputs.VERSION }}
       branch_name: ${{ steps.read_version.outputs.BRANCH_NAME }}
-      commit_sha: ${{ steps.get_commit_sha.outputs.COMMIT_SHA }}
 
     steps:
       - name: Checkout repository
@@ -42,20 +40,25 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Create and push new branch
+      - name: Check if release branch already exists
+        id: check_release_branch
         run: |
-          name=${{ env.BRANCH_NAME }}
-          echo "Creating and pushing new branch $name"
-          git checkout -b $name || { echo "ERROR: Branch creation failed"; exit 1; }
-          git push origin $name --force || { echo "ERROR: Push failed"; exit 1; }
+          branch_name=${{ env.BRANCH_NAME }}
+          if git ls-remote --exit-code --heads origin "$branch_name"; then
+            echo "Branch $branch_name already exists."
+            echo "RELEASE_BRANCH_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "Branch $branch_name does not exist. It will be created."
+            echo "RELEASE_BRANCH_EXISTS=false" >> $GITHUB_ENV
+          fi
 
-      - name: Get latest commit SHA
-        id: get_commit_sha
+      - name: Create and push new branch
+        if: env.RELEASE_BRANCH_EXISTS == 'false'
         run: |
-          commit_sha=$(git rev-parse HEAD)
-          echo "Commit SHA: $commit_sha"
-          echo "COMMIT_SHA=$commit_sha" >> $GITHUB_ENV
-          echo "::set-output name=COMMIT_SHA::$commit_sha"
+          branch_name=${{ env.BRANCH_NAME }}
+          echo "Creating and pushing new branch $branch_name"
+          git checkout -b $branch_name || { echo "ERROR: Branch creation failed"; exit 1; }
+          git push origin $branch_name --force || { echo "ERROR: Push failed"; exit 1; }
 
       - name: Check if deploy branch exists
         id: check_deploy_branch
@@ -103,10 +106,6 @@ jobs:
 
       - name: 📦 Install dependencies
         run: npm install
-
-      - name: Set EXPO environment variables
-        run: |
-          echo "EXPO_PUBLIC_VERSION=TEST_VERSION" >> $GITHUB_ENV
 
       - name: Build Release Candidate APK
         run: eas build --platform android --profile release-candidate
