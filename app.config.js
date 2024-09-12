@@ -8,11 +8,22 @@ const SUFFIX =
 
 const NAME =
   {
-    development: ' (DEV)',
+    development: ' Dev',
     production: '',
-    releaseCandidate: ' (RC)',
-    preRelease: '(PRE)',
+    releaseCandidate: ' Rc',
+    preRelease: ' Pre',
   }[process.env.APP_VARIANT] ?? '';
+
+const pkgVersion = require('./package.json').version;
+const pkgVersionBase = pkgVersion.replace(/-.*/, '');
+
+const commitCountSinceDevelop = 8;
+
+const VERSION = SUFFIX
+  ? `${pkgVersionBase}-${SUFFIX}.${commitCountSinceDevelop}`
+  : pkgVersionBase;
+
+const LATEST_SHA = process.env.COMMIT_COUNT.slice(0, 7);
 
 /**
  * @param {object} opts
@@ -22,6 +33,10 @@ const NAME =
  */
 module.exports = ({config}) => ({
   ...config,
+  version:
+    process.env.APP_VARIANT === 'production' || !LATEST_SHA
+      ? VERSION
+      : `${VERSION}+${LATEST_SHA}`,
   extra: {
     ...config.extra,
     eas: {
