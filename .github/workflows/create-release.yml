@@ -107,5 +107,8 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
+      - name: Get Commit Count
+        run: echo "COMMIT_COUNT=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+
       - name: Build Release Candidate APK
         run: eas build --platform android --profile release-candidate

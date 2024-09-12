@@ -1,5 +1,3 @@
-const execa = require('execa');
-
 const SUFFIX =
   {
     development: '.dev',
@@ -19,22 +17,13 @@ const NAME =
 const pkgVersion = require('./package.json').version;
 const pkgVersionBase = pkgVersion.replace(/-.*/, '');
 
-const commitCountSinceDevelop = execa.sync('git', [
-  'rev-list',
-  '--count',
-  'develop',
-]).stdout;
-
-const commitSha = execa.sync('git', ['rev-parse', 'HEAD']).stdout;
+const commitCountSinceDevelop = 8;
 
 const VERSION = SUFFIX
   ? `${pkgVersionBase}-${SUFFIX}.${commitCountSinceDevelop}`
   : pkgVersionBase;
 
-const LATEST_SHA = (commitSha || process.env.EAS_BUILD_GIT_COMMIT_HASH).slice(
-  0,
-  7,
-);
+const LATEST_SHA = process.env.COMMIT_COUNT.slice(0, 7);
 
 /**
  * @param {object} opts
